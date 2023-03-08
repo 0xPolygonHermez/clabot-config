@@ -52,7 +52,8 @@
     "C001-developer",
     "jimpo",
     "chriseth",
-    "graykode"
+    "graykode",
+    "icydark"
   ],
   "message": "We require contributors {{usersWithoutCLA}} to read our Contributor License Agreement, please check the [CLA document](https://github.com/0xPolygonHermez/clabot-config/blob/master/zkEVM%20-%20Contributor%20License%20Agreement.pdf)",
   "label": "cla-signed"
