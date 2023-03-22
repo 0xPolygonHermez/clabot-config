@@ -56,7 +56,7 @@
     "icydark",
     "cg-polygon"
   ],
-  "message": "We require contributors {{usersWithoutCLA}} to read our Contributor License Agreement, please check the [CLA document](https://github.com/0xPolygonHermez/clabot-config/blob/master/zkEVM%20-%20Contributor%20License%20Agreement.pdf)",
+  "message": "We require contributors/corporates {{usersWithoutCLA}} to read our Contributor License Agreement, please check the [Individual CLA document](https://github.com/0xPolygonHermez/clabot-config/blob/master/Individual%20CLA%20-%20Polygon%20zkEVM.pdf)/[Corporate CLA document](https://github.com/0xPolygonHermez/clabot-config/blob/master/Corporate%20CLA%20-%20Polygon%20zkEVM.pdf)",
   "label": "cla-signed"
 }
 
