@@ -73,11 +73,13 @@
     "lvella",
     "n-samar",
     "worldmars",
-    "oceans404", 
-    "adirola", 
+    "oceans404",
+    "adirola",
     "criadoperez",
     "nadimkobeissi",
-    "dpunish3r"
+    "dpunish3r",
+    "MCJOHN974",
+    "akashin"
   ],
   "message": "We require contributors/corporates {{usersWithoutCLA}} to read our Contributor License Agreement, please check the [Individual CLA document](https://github.com/0xPolygonHermez/clabot-config/blob/master/Individual%20CLA%20-%20Polygon%20zkEVM.pdf)/[Corporate CLA document](https://github.com/0xPolygonHermez/clabot-config/blob/master/Corporate%20CLA%20-%20Polygon%20zkEVM.pdf)",
   "label": "cla-signed"
