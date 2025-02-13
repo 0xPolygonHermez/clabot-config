@@ -150,7 +150,8 @@
     "sshrihar",
     "iszubok",
     "elliothllm",
-    "ivanbelyakoff"
+    "ivanbelyakoff",
+    "dloghin"
   ],
   "message": "We require contributors/corporates {{usersWithoutCLA}} to read our Contributor License Agreement, please check the [Individual CLA document](https://github.com/0xPolygonHermez/clabot-config/blob/master/Individual%20CLA%20-%20Polygon%20zkEVM.pdf)/[Corporate CLA document](https://github.com/0xPolygonHermez/clabot-config/blob/master/Corporate%20CLA%20-%20Polygon%20zkEVM.pdf)",
   "label": "cla-signed"
