@@ -72,7 +72,7 @@ jobs:
           
           ### How to sign the CLA:
           
-          1. 📄 **Read the CLA**: [Individual CLA Document](https://github.com/0xPolygonHermez/clabot-config/blob/master/CLA%20Zisk.pdf)
+          1. 📄 **Read the CLA**: [Individual CLA Document](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/master/CLA%20Zisk.pdf)
           2. 💬 **Accept digitally**: Comment on this PR with **exactly** this text:
           
           \`\`\`
