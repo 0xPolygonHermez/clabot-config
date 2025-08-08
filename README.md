@@ -45,8 +45,13 @@ GITHUB_TOKEN=your_token ./scripts/check-pending-cla.sh
 ### How to accept the CLA (Simplified Process)
 
 1. **Read the document**: [Individual CLA Document](./CLA%20Zisk.pdf)
-2. **Accept digitally**: Comment exactly: `I have read and agree to the CLA`
+2. **Accept digitally**: Comment with **exactly** this text (no additional words):
+   ```
+   I have read and agree to the CLA
+   ```
 3. **Automatic**: The bot will automatically add you using your verified GitHub account
+
+⚠️ **Important**: The comment must contain exactly the phrase above, with no additional text or modifications. This ensures legal compliance and prevents accidental acceptance.
 
 ### CLA States
 

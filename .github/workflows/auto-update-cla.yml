@@ -73,11 +73,15 @@ jobs:
           ### How to sign the CLA:
           
           1. 📄 **Read the CLA**: [Individual CLA Document](https://github.com/0xPolygonHermez/clabot-config/blob/master/CLA%20Zisk.pdf)
-          2. 💬 **Accept digitally**: Comment on this PR with exactly: \`I have read and agree to the CLA\`
+          2. 💬 **Accept digitally**: Comment on this PR with **exactly** this text:
           
-          That's it! No personal data required - just your GitHub account confirmation.
+          \`\`\`
+          I have read and agree to the CLA
+          \`\`\`
           
-          Once you comment, our bot will automatically register your acceptance and remove this requirement.
+          ⚠️ **Important**: The comment must contain exactly the text above, with no additional words or modifications.
+          
+          Once you comment with the exact phrase, our bot will automatically register your acceptance and remove this requirement.
           
           Thank you for your understanding! 🙏
           `;
@@ -92,8 +96,7 @@ jobs:
   update-cla:
     if: |
       (github.event_name == 'issue_comment' && 
-       github.event.issue.pull_request && 
-       contains(github.event.comment.body, 'I have read and agree to the CLA')) ||
+       github.event.issue.pull_request) ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     
@@ -107,7 +110,66 @@ jobs:
     - name: Install jq
       run: sudo apt-get install jq
       
+    - name: Validate CLA comment (strict check)
+      if: github.event_name == 'issue_comment'
+      id: validate_comment
+      run: |
+        COMMENT_BODY="${{ github.event.comment.body }}"
+        # Remove leading/trailing whitespace and normalize
+        TRIMMED_COMMENT=$(echo "$COMMENT_BODY" | xargs)
+        EXPECTED_PHRASE="I have read and agree to the CLA"
+        
+        echo "Comment received: '$TRIMMED_COMMENT'"
+        echo "Expected phrase: '$EXPECTED_PHRASE'"
+        
+        # Strict comparison - must match exactly
+        if [ "$TRIMMED_COMMENT" = "$EXPECTED_PHRASE" ]; then
+          echo "✅ Valid CLA acceptance comment detected"
+          echo "valid=true" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Invalid CLA comment format"
+          echo "The comment must contain EXACTLY: '$EXPECTED_PHRASE'"
+          echo "valid=false" >> $GITHUB_OUTPUT
+        fi
+      
+    - name: Respond to invalid CLA comment
+      if: github.event_name == 'issue_comment' && steps.validate_comment.outputs.valid == 'false'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { owner, repo } = context.repo;
+          const issue_number = context.issue.number;
+          
+          const errorMessage = [
+            '❌ **Invalid CLA Comment Format**',
+            '',
+            `@${{ github.event.comment.user.login }}, your comment does not match the required format.`,
+            '',
+            '**Required comment (exact text):**',
+            '```',
+            'I have read and agree to the CLA',
+            '```',
+            '',
+            'Please comment again with exactly the text above (no additional text or modifications).',
+            '',
+            '⚠️ **Security Note**: For legal compliance, we require the exact phrase without any modifications or additional text.'
+          ].join('\n');
+          
+          await github.rest.issues.createComment({
+            owner,
+            repo,
+            issue_number,
+            body: errorMessage
+          });
+          
+    - name: Stop workflow if comment is invalid
+      if: github.event_name == 'issue_comment' && steps.validate_comment.outputs.valid == 'false'
+      run: |
+        echo "❌ Stopping workflow due to invalid CLA comment format"
+        exit 1
+      
     - name: Determine contributor
+      if: github.event_name == 'workflow_dispatch' || (github.event_name == 'issue_comment' && steps.validate_comment.outputs.valid == 'true')
       id: contributor
       run: |
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -119,6 +181,7 @@ jobs:
         echo "Processing CLA for user: $CONTRIBUTOR"
       
     - name: Get contributor information
+      if: github.event_name == 'workflow_dispatch' || (github.event_name == 'issue_comment' && steps.validate_comment.outputs.valid == 'true')
       id: user_info
       run: |
         CONTRIBUTOR="${{ steps.contributor.outputs.username }}"
@@ -133,6 +196,7 @@ jobs:
         echo "Retrieved info for $CONTRIBUTOR (ID: $USER_ID)"
     
     - name: Add contributor to CLA with simple record
+      if: github.event_name == 'workflow_dispatch' || (github.event_name == 'issue_comment' && steps.validate_comment.outputs.valid == 'true')
       run: |
         CONTRIBUTOR="${{ steps.contributor.outputs.username }}"
         
@@ -149,6 +213,7 @@ jobs:
         echo "Added $CONTRIBUTOR to CLA contributors list"
         
     - name: Commit and push changes
+      if: github.event_name == 'workflow_dispatch' || (github.event_name == 'issue_comment' && steps.validate_comment.outputs.valid == 'true')
       run: |
         git config --local user.email "noreply@github.com"
         git config --local user.name "CLA Bot"
@@ -168,7 +233,7 @@ jobs:
         git push
         
     - name: Update PR labels and comment
-      if: github.event_name == 'issue_comment'
+      if: github.event_name == 'issue_comment' && steps.validate_comment.outputs.valid == 'true'
       uses: actions/github-script@v7
       with:
         script: |
