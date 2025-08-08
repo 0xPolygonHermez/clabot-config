@@ -1,0 +1,137 @@
+name: CLA Management Admin
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - 'add-user'
+          - 'remove-user'
+          - 'list-users'
+          - 'export-report'
+      username:
+        description: 'GitHub username (for add/remove actions)'
+        required: false
+        type: string
+      reason:
+        description: 'Reason for the action'
+        required: false
+        type: string
+
+jobs:
+  manage-cla:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Install jq
+      run: sudo apt-get install jq
+      
+    - name: Validate inputs
+      run: |
+        case "${{ github.event.inputs.action }}" in
+          "add-user"|"remove-user")
+            if [ -z "${{ github.event.inputs.username }}" ]; then
+              echo "Error: Username is required for ${{ github.event.inputs.action }}"
+              exit 1
+            fi
+            ;;
+        esac
+        
+    - name: Add user to CLA
+      if: github.event.inputs.action == 'add-user'
+      run: |
+        USERNAME="${{ github.event.inputs.username }}"
+        REASON="${{ github.event.inputs.reason }}"
+        
+        if jq -e --arg user "$USERNAME" '.contributors | index($user)' .clabot > /dev/null; then
+          echo "User $USERNAME already exists in CLA list"
+          exit 0
+        fi
+        
+        jq --arg user "$USERNAME" '.contributors += [$user] | .contributors |= sort' .clabot > .clabot.tmp
+        mv .clabot.tmp .clabot
+        
+        git config --local user.email "noreply@github.com"
+        git config --local user.name "CLA Admin"
+        git add .clabot
+        git commit -m "Admin: Add $USERNAME to CLA contributors
+
+        Reason: ${REASON:-Manual addition by admin}
+        Added by: ${{ github.actor }}
+        Timestamp: $(date -u)"
+        git push
+        
+        echo "✅ User $USERNAME added to CLA contributors"
+        
+    - name: Remove user from CLA
+      if: github.event.inputs.action == 'remove-user'
+      run: |
+        USERNAME="${{ github.event.inputs.username }}"
+        REASON="${{ github.event.inputs.reason }}"
+        
+        if ! jq -e --arg user "$USERNAME" '.contributors | index($user)' .clabot > /dev/null; then
+          echo "User $USERNAME not found in CLA list"
+          exit 0
+        fi
+        
+        jq --arg user "$USERNAME" '.contributors = (.contributors | map(select(. != $user)))' .clabot > .clabot.tmp
+        mv .clabot.tmp .clabot
+        
+        git config --local user.email "noreply@github.com"
+        git config --local user.name "CLA Admin"
+        git add .clabot
+        git commit -m "Admin: Remove $USERNAME from CLA contributors
+
+        Reason: ${REASON:-Manual removal by admin}
+        Removed by: ${{ github.actor }}
+        Timestamp: $(date -u)"
+        git push
+        
+        echo "✅ User $USERNAME removed from CLA contributors"
+        
+    - name: List CLA contributors
+      if: github.event.inputs.action == 'list-users'
+      run: |
+        echo "📋 Current CLA Contributors:"
+        echo "=========================="
+        jq -r '.contributors[]' .clabot | nl
+        echo ""
+        echo "Total contributors: $(jq '.contributors | length' .clabot)"
+        
+    - name: Export CLA report
+      if: github.event.inputs.action == 'export-report'
+      run: |
+        TIMESTAMP=$(date -u +"%Y%m%d_%H%M%S")
+        REPORT_FILE="cla_report_${TIMESTAMP}.json"
+        
+        jq '{
+          "generated_at": "'$(date -u)'",
+          "generated_by": "'${{ github.actor }}'",
+          "total_contributors": (.contributors | length),
+          "contributors": .contributors,
+          "cla_document": "CLA Zisk.pdf",
+          "repository": "'${{ github.repository }}'"
+        }' .clabot > "$REPORT_FILE"
+        
+        echo "📊 CLA Report Generated: $REPORT_FILE"
+        echo "=================================="
+        cat "$REPORT_FILE"
+        
+        # Upload as artifact
+        echo "artifact_name=cla-report-$TIMESTAMP" >> $GITHUB_ENV
+        echo "artifact_file=$REPORT_FILE" >> $GITHUB_ENV
+        
+    - name: Upload report artifact
+      if: github.event.inputs.action == 'export-report'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.artifact_name }}
+        path: ${{ env.artifact_file }}
+        retention-days: 30
