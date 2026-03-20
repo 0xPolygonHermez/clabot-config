@@ -29,5 +29,5 @@ cd clabot-config
 git commit -S -m "Add <your-username> to CLA signers - I have read and agree to the CLA"
 
 # Push and open a PR
-git push origin main
+git push origin HEAD
 ```
