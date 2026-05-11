@@ -1,5 +1,7 @@
 {
   "contributors": [
+    "dependabot[bot]",
+    "github-actions[bot]",
     "agnusmor",
     "eduadiez",
     "fractasy",
@@ -18,9 +20,7 @@
     "han0110",
     "jestape",
     "rubo",
-    "dependabot[bot]",
-    "github-actions[bot]",
-     "juanfranblanco",
+    "juanfranblanco",
     "maximmenshikov"
   ],
   "message": "We require contributors/corporates {{usersWithoutCLA}} to read our Contributor License Agreement, please check the [Individual CLA document](https://github.com/0xPolygonHermez/clabot-config/blob/master/CLA%20Zisk.pdf)",
