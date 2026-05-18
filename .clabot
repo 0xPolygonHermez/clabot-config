@@ -21,7 +21,8 @@
     "jestape",
     "rubo",
     "juanfranblanco",
-    "maximmenshikov"
+    "maximmenshikov",
+    "codygunton"
   ],
   "message": "We require contributors/corporates {{usersWithoutCLA}} to read our Contributor License Agreement, please check the [Individual CLA document](https://github.com/0xPolygonHermez/clabot-config/blob/master/CLA%20Zisk.pdf)",
   "label": "cla-signed"
