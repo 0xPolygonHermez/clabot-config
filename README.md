@@ -25,9 +25,12 @@ git clone https://github.com/<your-username>/clabot-config.git
 cd clabot-config
 
 # Edit .clabot and add your username to the "contributors" array
-# Then commit with a signed commit
+# Then stage the changes and commit with a signed commit
+git add .clabot
 git commit -S -m "Add <your-username> to CLA signers - I have read and agree to the CLA"
 
 # Push and open a PR
 git push origin HEAD
+gh pr create --title "Add <your-username> to CLA signers" \
+  --body "I have read and agree to the CLA"
 ```
